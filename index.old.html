@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Einkaufsliste</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3737/3737372.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+        .done-text { text-decoration: line-through; opacity: 0.5; }
+        html, body { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        main { height: 100%; overflow-y: auto; display: flex; flex-direction: column; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+
+    <main id="app" class="max-w-md mx-auto bg-white shadow-2xl relative">
+        
+        <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-10 shadow-sm">
+            <h1 class="text-xl font-black text-blue-600 tracking-tight">SHOPPING</h1>
+            <div class="flex gap-1">
+                <button onclick="app.refresh()" title="Aktualisieren" class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
+                </button>
+                <button onclick="app.showSettings()" title="Einstellungen" class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <section class="p-4 bg-white border-b">
+            <form id="addForm" class="flex gap-2">
+                <input type="text" id="itemName" placeholder="Was fehlt uns?" class="flex-1 p-3 border-2 border-slate-100 rounded-xl bg-slate-50 focus:border-blue-500 outline-none text-lg transition-all" required>
+                <button type="submit" title="Hinzufügen" class="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+            </form>
+        </section>
+
+        <section id="listContainer" class="flex-1 overflow-y-auto p-4 space-y-3 pb-24">
+            <div class="text-center text-slate-400 mt-10">Lade Liste...</div>
+        </section>
+
+        <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-slate-800 text-white text-xs rounded-full shadow-2xl z-50"></div>
+    </main>
+
+    <script>
+        const app = {
+            url: localStorage.getItem('shopping_gas_url'),
+            items: JSON.parse(localStorage.getItem('shopping_cache') || '[]'),
+
+            init() {
+                if (!this.url) {
+                    const setupUrl = prompt("Bitte gib die Google Apps Script Web-App URL ein:");
+                    if (setupUrl) {
+                        localStorage.setItem('shopping_gas_url', setupUrl);
+                        this.url = setupUrl;
+                    }
+                }
+                this.render();
+                if (this.url) this.refresh();
+                
+                document.getElementById('addForm').onsubmit = (e) => {
+                    e.preventDefault();
+                    this.addItem();
+                };
+            },
+
+            showSettings() {
+                if(confirm("Datenquelle löschen und App neu einrichten?")) {
+                    localStorage.removeItem('shopping_gas_url');
+                    location.reload();
+                }
+            },
+
+            showToast(msg, duration = 2000) {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.remove('hidden');
+                setTimeout(() => t.classList.add('hidden'), duration);
+            },
+
+            async refresh() {
+                try {
+                    const res = await fetch(this.url);
+                    const data = await res.json();
+                    this.items = data;
+                    localStorage.setItem('shopping_cache', JSON.stringify(data));
+                    this.render();
+                } catch (e) {
+                    this.showToast("Offline / Verbindung fehlgeschlagen");
+                }
+            },
+
+            async apiAction(payload) {
+                try {
+                    await fetch(this.url, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(payload)
+                    });
+                    setTimeout(() => this.refresh(), 800);
+                } catch (e) {
+                    this.showToast("Fehler beim Senden");
+                }
+            },
+
+            addItem() {
+                const el = document.getElementById('itemName');
+                const val = el.value.trim();
+                if (!val) return;
+                this.apiAction({ action: 'add', name: val });
+                el.value = '';
+            },
+
+            toggle(id) {
+                this.apiAction({ action: 'toggle', id: id });
+                const item = this.items.find(i => i.id == id);
+                if (item) {
+                    item.status = item.status === 'offen' ? 'erledigt' : 'offen';
+                    this.render();
+                }
+            },
+
+            render() {
+                const container = document.getElementById('listContainer');
+                if (this.items.length === 0) {
+                    container.innerHTML = '<div class="text-center text-slate-400 mt-10">Liste leer.</div>';
+                    return;
+                }
+                const sorted = [...this.items].sort((a, b) => (a.status === 'offen' ? -1 : 1));
+                let html = '';
+                sorted.forEach(item => {
+                    const isDone = item.status === 'erledigt';
+                    html += `
+                        <div class="flex items-center gap-3 p-4 bg-white rounded-2xl border shadow-sm transition-all active:bg-slate-50" onclick="app.toggle('${item.id}')">
+                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${isDone ? 'bg-green-500 border-green-500' : 'border-slate-300'}">
+                                ${isDone ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
+                            </div>
+                            <span class="flex-1 text-lg ${isDone ? 'done-text text-slate-400' : ''}">${item.name}</span>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        };
+        app.init();
+    </script>
+</body>
+</html>
