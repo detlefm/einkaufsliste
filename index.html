@@ -7,10 +7,16 @@
     <!-- Apple specific  -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3737/3737372.png">
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+        }
+    </script>
     <style>
         body { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .done-text { text-decoration: line-through; opacity: 0.4; }
@@ -20,51 +26,71 @@
         .animate-loading { animation: loadingStrip 1.5s infinite linear; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 font-sans">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
 
-    <main id="app" class="max-w-md mx-auto bg-white shadow-2xl relative overflow-hidden">
-        <div id="loadingBar" class="hidden absolute top-0 left-0 w-full h-1 bg-blue-100 z-30 overflow-hidden">
-            <div class="w-full h-full bg-blue-600 animate-loading"></div>
+    <main id="app" class="max-w-md mx-auto bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden">
+        <div id="loadingBar" class="hidden absolute top-0 left-0 w-full h-1 bg-blue-100 dark:bg-slate-800 z-30 overflow-hidden">
+            <div class="w-full h-full bg-blue-600 dark:bg-blue-500 animate-loading"></div>
         </div>
-        <header class="p-4 bg-white border-b flex justify-between items-center sticky top-0 z-20">
-            <h1 class="text-xl font-black text-blue-600 tracking-tight">EINKAUF</h1>
-            <div class="flex items-center gap-1">
-                <div class="mr-2 text-slate-400 text-xs font-bold transition-opacity" id="syncStatus"></div>
-                <button onclick="app.refresh()" title="Aktualisieren" class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors active:scale-95">
+        <header class="p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center sticky top-0 z-20">
+            <h1 class="text-xl font-black text-blue-600 dark:text-blue-400 tracking-tight">EINKAUF</h1>
+            <div class="flex items-center gap-1 relative">
+                <div class="mr-2 text-slate-400 dark:text-slate-500 text-xs font-bold transition-opacity" id="syncStatus"></div>
+                <button onclick="app.refresh()" title="Aktualisieren" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg>
                 </button>
-                <button onclick="app.showSettings()" title="Einstellungen" class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <button onclick="app.toggleMenu()" title="Menü" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
                 </button>
+
+                <!-- Hamburger Menu Dropdown -->
+                <div id="dropdownMenu" class="hidden absolute top-full right-0 mt-2 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden z-50">
+                    <button onclick="app.clearDone(); app.toggleMenu()" class="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        Erledigte aufräumen
+                    </button>
+                    <div class="h-px bg-slate-100 dark:bg-slate-700"></div>
+                    <button onclick="app.showSettings(); app.toggleMenu()" class="w-full text-left px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        Einstellungen
+                    </button>
+                </div>
             </div>
         </header>
 
-        <section class="p-4 bg-white border-b sticky top-[61px] z-10">
+        <!-- overlay to close menu when clicking outside -->
+        <div id="menuOverlay" onclick="app.toggleMenu()" class="hidden fixed inset-0 z-40 bg-transparent"></div>
+
+        <section class="p-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 sticky top-[61px] z-10">
             <form id="addForm" class="flex gap-2">
-                <input type="text" id="itemName" autocomplete="off" placeholder="Was fehlt?" class="flex-1 p-3 border-2 border-slate-100 rounded-xl bg-slate-50 focus:border-blue-500 outline-none text-lg transition-all">
-                <button type="submit" class="bg-blue-600 text-white p-3 rounded-xl active:scale-95 transition-all">
+                <input type="text" id="itemName" autocomplete="off" placeholder="Was fehlt?" class="flex-1 p-3 border-2 border-slate-100 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:border-blue-500 dark:focus:border-blue-500 outline-none text-lg transition-all text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500">
+                <button type="submit" class="bg-blue-600 dark:bg-blue-600/90 text-white p-3 rounded-xl hover:bg-blue-700 active:scale-95 transition-all">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 </button>
             </form>
         </section>
 
-        <section id="listContainer" class="flex-1 overflow-y-auto p-4 space-y-2 pb-20">
+        <section id="listContainer" class="flex-1 overflow-y-auto p-4 space-y-2 pb-20 bg-white dark:bg-slate-900">
             </section>
 
-        <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-slate-800 text-white text-xs rounded-full shadow-2xl z-50"></div>
+        <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white text-sm rounded-full shadow-2xl z-50 whitespace-nowrap"></div>
     </main>
 
     <script>
         const app = {
             url: localStorage.getItem('shopping_gas_url'),
             items: JSON.parse(localStorage.getItem('shopping_cache') || '[]'),
+            menuOpen: false,
 
             init() {
                 if (!this.url) {
                     this.items = [];
                     localStorage.removeItem('shopping_cache');
-                    const setupUrl = prompt("Google Apps Script URL eingeben:");
-                    if (setupUrl) { localStorage.setItem('shopping_gas_url', setupUrl); this.url = setupUrl; }
+                    // Timeout to let DOM load fully before prompting
+                    setTimeout(() => {
+                        const setupUrl = prompt("Google Apps Script URL eingeben:");
+                        if (setupUrl) { localStorage.setItem('shopping_gas_url', setupUrl); this.url = setupUrl; this.refresh(); }
+                    }, 500);
                 }
                 this.render();
                 if (this.url) this.refresh();
@@ -73,6 +99,19 @@
                     e.preventDefault();
                     this.addItem();
                 };
+            },
+
+            toggleMenu() {
+                this.menuOpen = !this.menuOpen;
+                const menu = document.getElementById('dropdownMenu');
+                const overlay = document.getElementById('menuOverlay');
+                if (this.menuOpen) {
+                    menu.classList.remove('hidden');
+                    overlay.classList.remove('hidden');
+                } else {
+                    menu.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                }
             },
 
             showSettings() {
@@ -95,13 +134,13 @@
                 const el = document.getElementById('syncStatus');
                 const bar = document.getElementById('loadingBar');
                 if (state === 'syncing') {
-                    el.innerHTML = '<span class="text-blue-500 animate-pulse">Lädt...</span>';
+                    el.innerHTML = '<span class="text-blue-500 dark:text-blue-400 animate-pulse">Lädt...</span>';
                     bar?.classList.remove('hidden');
                 } else if (state === 'error') {
-                    el.innerHTML = '<span class="text-red-500">Offline</span>';
+                    el.innerHTML = '<span class="text-red-500 dark:text-red-400">Offline</span>';
                     bar?.classList.add('hidden');
                 } else if (state === 'ok') {
-                    el.innerHTML = '<span class="text-green-500">Aktuell</span>';
+                    el.innerHTML = '<span class="text-green-500 dark:text-green-400">Aktuell</span>';
                     bar?.classList.add('hidden');
                     setTimeout(() => { if(el.innerText === 'Aktuell') el.innerHTML = ''; }, 3000);
                 }
@@ -130,7 +169,6 @@
                         mode: 'no-cors',
                         body: JSON.stringify(payload)
                     });
-                    // Wir warten nicht auf den Refresh, sondern machen das leise nach 1 Sekunde
                     setTimeout(() => this.refresh(), 1500);
                 } catch (e) {
                     this.setSyncState('error');
@@ -143,15 +181,13 @@
                 const val = el.value.trim();
                 if (!val) return;
 
-                // OPTIMISTIC: Sofort lokal hinzufügen
                 const tempId = "t-" + Date.now();
                 const newItem = { id: tempId, name: val, status: 'offen' };
                 
-                this.items.push(newItem); // Ganz unten einfügen
+                this.items.push(newItem);
                 this.render();
                 el.value = '';
 
-                // Backend-Call im Hintergrund
                 this.apiPost({ action: 'add', name: val });
             },
 
@@ -159,34 +195,45 @@
                 const item = this.items.find(i => i.id == id);
                 if (!item) return;
 
-                // OPTIMISTIC: Sofort Status lokal ändern
                 const targetStatus = item.status === 'offen' ? 'erledigt' : 'offen';
                 item.status = targetStatus;
                 this.render();
 
-                // Backend-Call im Hintergrund
                 this.apiPost({ action: 'toggle', id: id, status: targetStatus });
             },
 
             deleteItem(id) {
                 if(!confirm("Eintrag wirklich löschen?")) return;
                 
-                // Optimistic UI update
                 this.items = this.items.filter(i => i.id != id);
                 this.render();
 
-                // Backend-Call
                 this.apiPost({ action: 'delete', id: id });
+            },
+
+            clearDone() {
+                const doneItems = this.items.filter(i => i.status === 'erledigt');
+                if (doneItems.length === 0) {
+                    this.showToast("Keine erledigten Einträge vorhanden");
+                    return;
+                }
+                
+                if(!confirm("Alle erledigten Einträge unwiederbringlich löschen?")) return;
+
+                this.items = this.items.filter(i => i.status !== 'erledigt');
+                this.render();
+
+                this.apiPost({ action: 'clearDone' });
+                this.showToast(`${doneItems.length} Einträge gelöscht`);
             },
 
             render() {
                 const container = document.getElementById('listContainer');
                 if (this.items.length === 0) {
-                    container.innerHTML = '<div class="text-center text-slate-400 mt-10">Keine Einträge</div>';
+                    container.innerHTML = '<div class="text-center text-slate-400 dark:text-slate-500 mt-10">Keine Einträge</div>';
                     return;
                 }
 
-                // Sortierung: Offen oben, Erledigt unten
                 const sorted = [...this.items].sort((a, b) => {
                     if (a.status === b.status) return 0;
                     return a.status === 'offen' ? -1 : 1;
@@ -196,12 +243,12 @@
                 sorted.forEach(item => {
                     const isDone = item.status === 'erledigt';
                     html += `
-                        <div class="flex items-center gap-3 p-4 bg-white rounded-xl border border-slate-100 shadow-sm active:bg-slate-50 transition-colors" onclick="app.toggle('${item.id}')">
-                            <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center ${isDone ? 'bg-green-500 border-green-500' : 'border-slate-300'}">
+                        <div class="flex items-center gap-3 p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm active:bg-slate-50 dark:active:bg-slate-700/80 transition-colors" onclick="app.toggle('${item.id}')">
+                            <div class="w-6 h-6 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${isDone ? 'bg-green-500 border-green-500 dark:bg-green-600 dark:border-green-600' : 'border-slate-300 dark:border-slate-500'}">
                                 ${isDone ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="4"><polyline points="20 6 9 17 4 12"></polyline></svg>' : ''}
                             </div>
-                            <span class="flex-1 text-lg ${isDone ? 'done-text text-slate-400' : 'text-slate-800'}">${item.name}</span>
-                            <button onclick="event.stopPropagation(); app.deleteItem('${item.id}')" class="p-2 text-red-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors active:scale-95" title="Löschen">
+                            <span class="flex-1 text-lg leading-tight transition-colors ${isDone ? 'done-text text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'}">${item.name}</span>
+                            <button onclick="event.stopPropagation(); app.deleteItem('${item.id}')" class="p-2 -mr-2 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 dark:text-red-400/80 dark:hover:text-red-400 rounded-full transition-colors active:scale-95 shrink-0" title="Löschen">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                             </button>
                         </div>
