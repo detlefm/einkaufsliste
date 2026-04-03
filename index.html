@@ -81,6 +81,8 @@
             url: localStorage.getItem('shopping_gas_url'),
             items: JSON.parse(localStorage.getItem('shopping_cache') || '[]'),
             menuOpen: false,
+            pendingRequests: 0,
+            syncTimeout: null,
 
             init() {
                 if (!this.url) {
@@ -147,10 +149,15 @@
             },
 
             async refresh() {
+                if (this.pendingRequests > 0) return;
+
                 this.setSyncState('syncing');
                 try {
                     const res = await fetch(this.url);
                     const data = await res.json();
+
+                    if (this.pendingRequests > 0) return;
+
                     this.items = data;
                     localStorage.setItem('shopping_cache', JSON.stringify(data));
                     this.render();
@@ -162,17 +169,30 @@
             },
 
             async apiPost(payload) {
+                this.pendingRequests++;
                 this.setSyncState('syncing');
+
+                if (this.syncTimeout) {
+                    clearTimeout(this.syncTimeout);
+                    this.syncTimeout = null;
+                }
+
                 try {
                     await fetch(this.url, {
                         method: 'POST',
                         mode: 'no-cors',
                         body: JSON.stringify(payload)
                     });
-                    setTimeout(() => this.refresh(), 1500);
                 } catch (e) {
                     this.setSyncState('error');
                     this.showToast("Offline / Fehler beim Senden");
+                } finally {
+                    this.pendingRequests--;
+                    if (this.pendingRequests === 0) {
+                        this.syncTimeout = setTimeout(() => {
+                            this.refresh();
+                        }, 1500);
+                    }
                 }
             },
 
