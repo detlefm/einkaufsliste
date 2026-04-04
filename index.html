@@ -83,6 +83,8 @@
             menuOpen: false,
             pendingRequests: 0,
             syncTimeout: null,
+            actionQueue: [],
+            isProcessingQueue: false,
 
             init() {
                 if (!this.url) {
@@ -177,22 +179,37 @@
                     this.syncTimeout = null;
                 }
 
-                try {
-                    await fetch(this.url, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify(payload)
-                    });
-                } catch (e) {
-                    this.setSyncState('error');
-                    this.showToast("Offline / Fehler beim Senden");
-                } finally {
-                    this.pendingRequests--;
-                    if (this.pendingRequests === 0) {
-                        this.syncTimeout = setTimeout(() => {
-                            this.refresh();
-                        }, 1500);
+                this.actionQueue.push(payload);
+                if (!this.isProcessingQueue) {
+                    this.processQueue();
+                }
+            },
+
+            async processQueue() {
+                this.isProcessingQueue = true;
+
+                while (this.actionQueue.length > 0) {
+                    const payload = this.actionQueue[0];
+                    try {
+                        await fetch(this.url, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            body: JSON.stringify(payload)
+                        });
+                    } catch (e) {
+                        this.setSyncState('error');
+                        this.showToast("Offline / Fehler beim Senden");
                     }
+                    this.actionQueue.shift();
+                    this.pendingRequests--;
+                }
+
+                this.isProcessingQueue = false;
+                
+                if (this.pendingRequests === 0) {
+                    this.syncTimeout = setTimeout(() => {
+                        this.refresh();
+                    }, 1500);
                 }
             },
 
@@ -201,14 +218,14 @@
                 const val = el.value.trim();
                 if (!val) return;
 
-                const tempId = "t-" + Date.now();
-                const newItem = { id: tempId, name: val, status: 'offen' };
+                const newId = Date.now().toString();
+                const newItem = { id: newId, name: val, status: 'offen' };
                 
                 this.items.push(newItem);
                 this.render();
                 el.value = '';
 
-                this.apiPost({ action: 'add', name: val });
+                this.apiPost({ action: 'add', id: newId, name: val });
             },
 
             toggle(id) {

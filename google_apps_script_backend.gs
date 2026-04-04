@@ -19,17 +19,20 @@ function doGet() {
 }
 
 function doPost(e) {
-  const sheet = getSheet();
-  const payload = JSON.parse(e.postData.contents);
-  const action = payload.action;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getSheet();
+    const payload = JSON.parse(e.postData.contents);
+    const action = payload.action;
 
-  if (action === 'add') {
-    sheet.appendRow([
-      Date.now().toString(), // ID
-      payload.name,
-      payload.amount || "1",
-      "offen"
-    ]);
+    if (action === 'add') {
+      sheet.appendRow([
+        payload.id || Date.now().toString(), // ID from frontend or fallback
+        payload.name,
+        payload.amount || "1",
+        "offen"
+      ]);
   } else if (action === 'toggle') {
     const data = sheet.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
@@ -59,6 +62,9 @@ function doPost(e) {
 
   return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
     .setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function getSheet() {
